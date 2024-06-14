@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Chat</h1>
+        <div id="chat-window">
+            <div id="output"></div>
+        </div>
+        <textarea id="user-input" placeholder="Type your message here..."></textarea>
+        <button id="send-button">Send</button>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            function sendMessage() {
+                var userInput = $('#user-input').val();
+                $('#user-input').val('');
+                
+                console.log('User input: ', userInput); // Debugging log
+                
+                $.ajax({
+                    url: '/get_prompt',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ input: userInput }),
+                    success: function(response) {
+                        console.log('Response from server: ', response); // Debugging log
+                        $('#output').append('<p><strong>You:</strong> ' + response.user_prompt + '</p>');
+                        $('#output').append('<p><strong>Bot:</strong> ' + response.bot_response + '</p>');
+                    },
+                    error: function(error) {
+                        console.log('Error:', error); // Debugging log
+                    }
+                });
+            }
+
+            $('#user-input').keydown(function(event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            $('#send-button').click(function(){
+                sendMessage();
+            });
+        });
+    </script>
+</body>
+</html>
+
